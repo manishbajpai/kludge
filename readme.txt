@@ -1,3 +1,5 @@
+Checkout the wiki for some screenshots: https://github.com/manishbajpai/kludge/wiki
+
 This project allows you to download your account records from TD Ameritrade and visualize them locally. You need to know two things in order to use this project:
 - Installing python 3 and pip packages
 - Getting an API key from TD Ameritrade
