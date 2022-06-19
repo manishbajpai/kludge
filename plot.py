@@ -13,6 +13,8 @@ schema_tda_current_assets=['date', 'accountid', 'symbol', 'units', 'value']
 schema_tda_current_networth=['date', 'accountid', 'value']
 schema_tda_trades=['accoutid', 'date', 'symbol', 'units', 'value', 'description']
 schema_tda_historical_networth = ['date', 'accountid', 'value']
+# {now.date()}, {symbol}, {mark}, {fromhigh}, {fromlow}
+schema_hilo = ['date', 'Symbol', 'Mark', '% From High', '% To High', '% From Low']
 
 # def plot_bar(x, y):
 #     fig = plt.figure()
@@ -33,7 +35,7 @@ schema_tda_historical_networth = ['date', 'accountid', 'value']
 def plotholdings():
     data = pandas.read_csv(PATH+'/tda_current_assets.csv', sep='\s*,\s*', engine='python', \
         header=None, names=schema_tda_current_assets)
-    print(data)
+    #print(data)
     return px.bar(data_frame=data, labels=dict(symbol='Stock Ticker', value='Value ($)'), x='symbol', y='value', \
         title='Holdings')
 
@@ -42,6 +44,7 @@ def plottimeseries():
         dtype={"accountid":str}, header=None, names=schema_tda_current_networth)
 
     # plot_bar(data['accountid'], data['value'])
+    # width = 50*len(data['accountid'])
     fig = px.bar(data_frame=data, labels=dict(symbol='Account ID', value='Value ($)'), x='accountid', y='value', \
         title='Account Values')
     return fig
@@ -60,15 +63,21 @@ def plottrades():
     #fig.tight_layout()
 
     # plt.show()
-
+def plothilo():
+    data = pandas.read_csv(PATH+'/tda_hilo.csv', sep='\s*,\s*', engine='python', header=None, names=schema_hilo)
+    return data
 # plotholdings()
 # plottimeseries()
 # plottrades()
 
 app = Dash(__name__)
 
-df = plottrades()
+tx = plottrades()
+hilo = plothilo()
+
 style={'width': '90vw', 'margin-left': 'auto',\
+            'margin-right': 'auto'}
+style1={'width': '30vw', 'margin-left': 'auto',\
             'margin-right': 'auto'}
 app.layout = html.Div(style=style, children=[
     html.H1(children='TD Ameritrade Account Status'),
@@ -78,17 +87,36 @@ app.layout = html.Div(style=style, children=[
     dcc.Graph(id='holdings', figure=plotholdings(), style = style),
     #html.Div(children='''Chart 2'''),
 
-    dcc.Graph(id='timeseries', figure=plottimeseries(), style=style),
+    dcc.Graph(id='timeseries', figure=plottimeseries(), style=style1),
+
+    html.H2(children='Account Transactions'),
+
     dash_table.DataTable(
-        id='table',
+        id='table_tx',
         columns=[{"name": i, "id": i}
-            for i in df.columns],
-        data=df.to_dict('records'),
+            for i in tx.columns],
+        data=tx.to_dict('records'),
         style_cell=dict(textAlign='left'),
         style_header=dict(backgroundColor="paleturquoise"),
         style_data=dict(backgroundColor="lavender"),
-        sort_action='native'
-    ), 
+        sort_action='native',
+        filter_action='native',
+        page_size=15,
+    ),
+    html.H2(children='Market data'),
+
+    dash_table.DataTable(
+        id='table_hilo',
+        columns=[{"name": i, "id": i}
+            for i in hilo.columns],
+        data=hilo.to_dict('records'),
+        style_cell=dict(textAlign='left'),
+        style_header=dict(backgroundColor="paleturquoise"),
+        style_data=dict(backgroundColor="lavender"),
+        sort_action='native',
+        filter_action='native',
+        page_size=15,
+    ),
 ])
 
 if __name__ == '__main__':
