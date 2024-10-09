@@ -1,3 +1,5 @@
+* Since TD Ameritrade brokerage in US has been sold to Schwab, this code is only of historical interest, and is archived *
+
 Checkout the wiki for some screenshots: https://github.com/manishbajpai/kludge/wiki
 
 This project allows you to download your account records from TD Ameritrade and visualize them locally. You need to know two things in order to use this project:
